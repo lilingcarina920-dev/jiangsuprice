@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - 江苏每日价格采集</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+        }
+        
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .login-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .login-card h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 24px;
+        }
+        .form-group { margin-bottom: 20px; }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-size: 14px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #1890ff;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #1890ff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .btn:hover { background: #40a9ff; }
+        .error {
+            color: #ff4d4f;
+            margin-top: 10px;
+            text-align: center;
+            font-size: 14px;
+        }
+        .hidden { display: none; }
+        
+        .main-container { display: none; }
+        .main-container.active { display: block; }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid #e8e8e8;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 { font-size: 20px; color: #1d1d1f; }
+        
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1d1d1f;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            color: #1890ff;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #ddd;
+            color: #666;
+        }
+        .btn-outline:hover { background: #f5f5f5; }
+        
+        .btn-primary {
+            background: #1890ff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-primary:hover { background: #40a9ff; }
+        
+        .progress-section {
+            margin-top: 16px;
+        }
+        .progress-item {
+            margin-bottom: 16px;
+        }
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .progress-bar-bg {
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #1890ff;
+            transition: width 0.3s;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+        th {
+            font-weight: 600;
+            color: #666;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .badge-success { background: #f6ffed; color: #52c41a; }
+        .badge-warning { background: #fffbe6; color: #faad14; }
+    </style>
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div id="loginPage" class="login-container">
+        <div class="login-card">
+            <h1>管理后台登录</h1>
+            <div class="form-group">
+                <label>用户名</label>
+                <input type="text" id="username" placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="password" placeholder="请输入密码">
+            </div>
+            <button class="btn" onclick="handleLogin()">登录</button>
+            <p id="loginError" class="error hidden"></p>
+        </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div id="mainPage" class="main-container">
+        <header class="header">
+            <h1>江苏每日价格采集 - 管理后台</h1>
+            <button class="btn btn-outline" onclick="handleLogout()">退出</button>
+        </header>
+
+        <main class="content">
+            <!-- 统计卡片 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="todayFilled">0</div>
+                    <div class="stat-label">今日已填写</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="todayPending">0</div>
+                    <div class="stat-label">今日未填写</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalMerchants">65</div>
+                    <div class="stat-label">总商户数</div>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="card">
+                <button class="btn-primary" onclick="exportData()">📥 导出本月数据</button>
+            </div>
+
+            <!-- 填写进度 -->
+            <div class="card">
+                <div class="card-title">本周填写进度</div>
+                <div class="progress-section" id="progressSection">
+                    <!-- 动态生成 -->
+                </div>
+            </div>
+
+            <!-- 今日详情 -->
+            <div class="card">
+                <div class="card-title">今日详情</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>店名</th>
+                            <th>地市</th>
+                            <th>联系人</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody id="merchantTable">
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: #999;">加载中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 登录验证
+        const ADMIN_USERNAME = 'admin';
+        const ADMIN_PASSWORD = 'admin123';
+
+        function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('loginError');
+
+            if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('mainPage').classList.add('active');
+                localStorage.setItem('isLoggedIn', 'true');
+                loadData();
+            } else {
+                errorEl.textContent = '用户名或密码错误';
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('isLoggedIn');
+            location.reload();
+        }
+
+        // 检查登录状态
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('mainPage').classList.add('active');
+            loadData();
+        }
+
+        // 加载数据
+        async function loadData() {
+            try {
+                // 根据环境选择API路径
+                const apiBase = window.location.hostname === 'localhost' 
+                    ? '' 
+                    : '/.netlify/functions';
+                
+                // 加载商户白名单
+                const merchantsRes = await fetch('merchants.json');
+                const merchants = await merchantsRes.json();
+                
+                // 加载提交数据
+                const dataRes = await fetch(`${apiBase}/api/data`);
+                const prices = await dataRes.json();
+                
+                updateUI(merchants, prices);
+            } catch (error) {
+                console.error('加载数据失败:', error);
+            }
+        }
+        
+        // 每30秒自动刷新数据
+        setInterval(loadData, 30000);
+
+        // 更新UI
+        function updateUI(merchants, prices) {
+            const today = new Date();
+            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            const todayWeekday = weekdays[today.getDay()];
+            
+            // 今日商户
+            const todayMerchants = merchants.filter(m => m.weekday === todayWeekday);
+            
+            // 今日归属日期
+            const todayStr = today.toISOString().split('T')[0];
+            
+            // 已填写的商户ID（按归属日期判断）
+            const filledIds = prices
+                .filter(p => p.assigned_date === todayStr)
+                .map(p => p.merchant_id);
+            
+            // 更新统计
+            const filled = todayMerchants.filter(m => filledIds.includes(m.id));
+            const pending = todayMerchants.filter(m => !filledIds.includes(m.id));
+            
+            document.getElementById('todayFilled').textContent = filled.length;
+            document.getElementById('todayPending').textContent = pending.length;
+            
+            // 本周进度（周一到今天）
+            const weekStart = new Date(today);
+            const dayOfWeek = today.getDay();
+            const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            weekStart.setDate(today.getDate() + diffToMonday);
+            
+            let progressHTML = '';
+            for (let i = 0; i < 5; i++) {
+                const date = new Date(weekStart);
+                date.setDate(weekStart.getDate() + i);
+                
+                // 只显示到今天
+                if (date > today) break;
+                
+                const weekday = weekdays[date.getDay()];
+                const dayMerchants = merchants.filter(m => m.weekday === weekday);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                // 统计该日期已填写数
+                const filledCount = prices.filter(p => p.assigned_date === dateStr).length;
+                const percent = dayMerchants.length > 0 ? Math.round(filledCount / dayMerchants.length * 100) : 0;
+                
+                progressHTML += `
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span>${weekday}（${date.getMonth() + 1}/${date.getDate()}）</span>
+                            <span>${filledCount}/${dayMerchants.length} - ${percent}%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            document.getElementById('progressSection').innerHTML = progressHTML || '<p style="color:#999">本周暂无数据</p>';
+            
+            // 今日商户表格
+            let tableHTML = '';
+            todayMerchants.forEach(m => {
+                const isFilled = filledIds.includes(m.id);
+                tableHTML += `
+                    <tr>
+                        <td>${m.shop_name}</td>
+                        <td>${m.city}</td>
+                        <td>${m.contact}</td>
+                        <td>
+                            <span class="badge ${isFilled ? 'badge-success' : 'badge-warning'}">
+                                ${isFilled ? '已填写' : '未填写'}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('merchantTable').innerHTML = tableHTML || '<tr><td colspan="4" style="text-align: center; color: #999;">今日无采集商户</td></tr>';
+        }
+
+        // 导出数据
+        async function exportData() {
+            try {
+                // 根据环境选择API路径
+                const apiBase = window.location.hostname === 'localhost' 
+                    ? '' 
+                    : '/.netlify/functions';
+                
+                const response = await fetch(`${apiBase}/api/export`);
+                
+                // 检查是否是base64编码的响应
+                const contentType = response.headers.get('Content-Type');
+                
+                if (contentType && contentType.includes('spreadsheetml')) {
+                    // Excel文件
+                    const buf = await response.arrayBuffer();
+                    const blob = new Blob([buf], { 
+                        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+                    });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    
+                    const today = new Date();
+                    const month = today.getFullYear() + String(today.getMonth() + 1).padStart(2, '0');
+                    a.download = `${month} 江苏每日产品价格采集.xlsx`;
+                    
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    // JSON响应（错误）
+                    const result = await response.json();
+                    alert(result.error || '导出失败');
+                }
+            } catch (error) {
+                console.error('导出失败:', error);
+                alert('导出失败，请重试');
+            }
+        }
+    </script>
+</body>
+</html>

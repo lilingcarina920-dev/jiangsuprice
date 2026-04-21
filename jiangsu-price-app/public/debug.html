@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>调试页面</title>
+</head>
+<body>
+    <h1>调试信息</h1>
+    <div id="info"></div>
+    <script>
+        async function test() {
+            const info = document.getElementById('info');
+            try {
+                const response = await fetch('merchants.json');
+                const merchants = await response.json();
+                info.innerHTML = `
+                    <p>✅ merchants.json 加载成功</p>
+                    <p>商户数量: ${merchants.length}</p>
+                    <p>第一个商户: ${JSON.stringify(merchants[0])}</p>
+                    <p>测试手机号: 13358120303</p>
+                    <p>查找结果: ${JSON.stringify(merchants.find(m => m.phone === '13358120303'))}</p>
+                `;
+            } catch (err) {
+                info.innerHTML = `<p>❌ 错误: ${err.message}</p>`;
+            }
+        }
+        test();
+    </script>
+</body>
+</html>

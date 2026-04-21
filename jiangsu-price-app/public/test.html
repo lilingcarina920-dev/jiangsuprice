@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>测试页面</title>
+</head>
+<body>
+    <h1>测试商户数据加载</h1>
+    <div id="result">加载中...</div>
+    <script>
+        fetch('merchants.json')
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('result').innerHTML = 
+                    '✅ 加载成功，共 ' + data.length + ' 户商户<br>' +
+                    '第一个商户：' + JSON.stringify(data[0]);
+            })
+            .catch(err => {
+                document.getElementById('result').innerHTML = 
+                    '❌ 加载失败：' + err.message;
+            });
+    </script>
+</body>
+</html>
