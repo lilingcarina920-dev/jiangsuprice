@@ -307,9 +307,7 @@
         async function loadData() {
             try {
                 // 根据环境选择API路径
-                const apiBase = window.location.hostname === 'localhost' 
-                    ? '' 
-                    : '/.netlify/functions';
+                const apiBase = '';
                 
                 // 加载商户白名单
                 const merchantsRes = await fetch('merchants.json');
@@ -412,9 +410,7 @@
         async function exportData() {
             try {
                 // 根据环境选择API路径
-                const apiBase = window.location.hostname === 'localhost' 
-                    ? '' 
-                    : '/.netlify/functions';
+                const apiBase = '';
                 
                 const response = await fetch(`${apiBase}/api/export`);
                 
