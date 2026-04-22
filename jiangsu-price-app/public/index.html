@@ -476,9 +476,7 @@
             });
             
             try {
-                const apiBase = window.location.hostname === 'localhost' 
-                    ? '' 
-                    : '/.netlify/functions';
+                const apiBase = '';
                 
                 // 先检查是否已提交
                 const checkRes = await fetch(`${apiBase}/api/check-submitted?merchant_id=${data.merchant_id}&assigned_date=${data.assigned_date}`);
