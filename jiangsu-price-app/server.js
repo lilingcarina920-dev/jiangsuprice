@@ -233,7 +233,17 @@ app.get('/api/export', (req, res) => {
         res.status(500).json({ error: '导出失败' });
     }
 });
-
+// ⚠️ 临时接口：清空所有数据（用完立即删除！）
+app.delete('/api/clear-all', (req, res) => {
+    try {
+        fs.writeFileSync(PRICES_FILE, '[]');
+        console.log('✅ 所有数据已清空');
+        res.json({ success: true, message: '所有数据已清空' });
+    } catch (error) {
+        console.error('清空失败:', error);
+        res.status(500).json({ success: false, message: '清空失败' });
+    }
+});
 // 启动服务器
 app.listen(PORT, () => {
     console.log(`\n========================================`);
