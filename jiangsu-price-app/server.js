@@ -158,7 +158,7 @@ app.get('/api/export', (req, res) => {
         // 为每个日期创建工作表
         dates.forEach(date => {
             const dayPrices = grouped[date];
-            const weekday = dayPrices[0].assigned_weekday;
+            const weekday = dayPrices[0].assigned_weekday || '未知';
             
             // 工作表名称（Excel限制31字符）
             const sheetName = `【${weekday}】${date}`.substring(0, 31);
