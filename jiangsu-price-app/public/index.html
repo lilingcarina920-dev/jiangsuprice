@@ -431,7 +431,23 @@
             }
             
             document.getElementById('deadline').textContent = `${deadlineMonth}月${deadlineDay}日24点`;
-            
+            // 查询是否已提交，如果已提交则填充表单
+            try {
+                const merchantDataRes = await fetch(`/api/merchant-data?merchant_id=${merchant.id}&assigned_date=${assignedDate.toISOString().split('T')[0]}`);
+                const merchantData = await merchantDataRes.json();
+                
+                if (merchantData && merchantData.prices) {
+                    // 已提交，填充表单
+                    products.forEach(p => {
+                        const input = document.querySelector(`input[name="${p.id}"]`);
+                        if (input && merchantData.prices[p.id] !== undefined) {
+                            input.value = merchantData.prices[p.id];
+                        }
+                    });
+                }
+            } catch (e) {
+                console.log('查询已提交数据失败:', e);
+            }
             // 切换页面
             document.getElementById('verifyPage').classList.add('hidden');
             document.getElementById('fillPage').classList.remove('hidden');
@@ -478,12 +494,23 @@
             try {
                 const apiBase = '';
                 
-                // 先检查是否已提交
-                const checkRes = await fetch(`${apiBase}/api/check-submitted?merchant_id=${data.merchant_id}&assigned_date=${data.assigned_date}`);
-                const checkData = await checkRes.json();
+            // 检查是否已过截止日期（复用显示逻辑）
+                const dayOfWeek = now.getDay();
+                const diffToSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+                const thisSunday = new Date(now);
+                thisSunday.setDate(now.getDate() + diffToSunday);
                 
-                if (checkData.submitted) {
-                    alert('您本周已提交过数据，无需重复提交');
+                let deadlineDate;
+                if (thisSunday.getMonth() === now.getMonth() && thisSunday.getFullYear() === now.getFullYear()) {
+                    deadlineDate = new Date(thisSunday);
+                } else {
+                    // 本月最后一天
+                    deadlineDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                }
+                deadlineDate.setHours(24, 0, 0, 0);
+                
+                if (now > deadlineDate) {
+                    alert('已过补填截止日期，无法提交');
                     return;
                 }
                 
