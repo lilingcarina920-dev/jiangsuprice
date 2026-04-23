@@ -134,7 +134,23 @@ app.get('/api/data', (req, res) => {
         res.status(500).json({ error: '读取失败' });
     }
 });
-
+// 查询商户已提交数据
+app.get('/api/merchant-data', (req, res) => {
+    try {
+        const { merchant_id, assigned_date } = req.query;
+        const prices = JSON.parse(fs.readFileSync(PRICES_FILE, 'utf8'));
+        
+        const data = prices.find(p => 
+            p.merchant_id == merchant_id && 
+            p.assigned_date === assigned_date
+        );
+        
+        res.json(data || null);
+    } catch (error) {
+        console.error('查询失败:', error);
+        res.json(null);
+    }
+});
 // 导出Excel
 app.get('/api/export', (req, res) => {
     try {
